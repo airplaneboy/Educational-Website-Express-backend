@@ -4,6 +4,9 @@ const connectDB = require('./database/db');
 const { auth, courses } = require('./routes/routes');
 
 const app = express();
+//Middlewares
+app.use(express.json());
+
 //Routes
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/courses', courses);

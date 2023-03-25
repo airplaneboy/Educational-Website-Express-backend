@@ -1,16 +1,7 @@
 const mongoose = require('mongoose');
+const bcryptJS = require('bcryptjs');
 
-const Notifications = {
-  type: Notification,
-  message: String,
-  timestamps: true,
-};
-
-const Settings = {
-  type: Settings,
-};
-
-const userSchema = mongoose.Schema(
+const UserSchema = mongoose.Schema(
   {
     //Primary
     username: {
@@ -71,15 +62,15 @@ const userSchema = mongoose.Schema(
       currentLesson: { type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' },
     },
     enrolledCourses: {
-      type: [Schema.Types.ObjectId],
+      type: [mongoose.Schema.Types.ObjectId],
       ref: 'Courses',
     },
     completedCourses: {
-      type: [Schema.Types.ObjectId],
+      type: [mongoose.Schema.Types.ObjectId],
       ref: 'Courses',
     },
     bookmark: {
-      type: [Schema.Type.ObjectId],
+      type: [mongoose.Schema.Types.ObjectId],
       ref: 'Courses',
     },
     comments: [
@@ -107,16 +98,23 @@ const userSchema = mongoose.Schema(
         // other relevant fields like sender, link, etc.
       },
     ],
-    settings: {
-      language: { type: String, default: 'en' },
-      emailNotifications: { type: Boolean, default: true },
-      username: { type: String, required: true },
-      hashedPassword: { type: String, required: true },
-      profilePicture: { type: String },
-      bio: { type: String },
-    },
+    // settings: {
+    //   language: { type: String, default: 'en' },
+    //   emailNotifications: { type: Boolean, default: true },
+    //   username: { type: String, default: this.username },
+    //   hashedPassword: { type: String, default: this.password },
+    //   email: { type: String, default: this.email },
+    //   profilePicture: { type: String },
+    //   bio: { type: String },
+    // },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Users', userSchema);
+UserSchema.pre('save', async function (next) {
+  const salt = await bcryptJS.genSalt(12);
+  this.password = await bcryptJS.hash(this.password, salt);
+  next();
+});
+
+module.exports = mongoose.model('Users', UserSchema);
