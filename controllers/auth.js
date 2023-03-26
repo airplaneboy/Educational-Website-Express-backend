@@ -14,17 +14,39 @@ const registerUser = async (req, res) => {
   if (userExists) {
     throw new BadRequestError('That email already exists');
   }
-  const user = await User.create({ ...req.body, username, email, password });
+  //Create user if user does not exist
+  const user = await User.create({
+    ...req.body,
+    username,
+    email,
+    password: password.toString(),
+  });
+  //Create JWT token
   const token = await user.createJWT();
-  res.status(StatusCodes.OK).json({ user, token });
+  //Response
+  res.status(StatusCodes.CREATED).json({ user, token });
 };
 
-const loginUser = (req, res) => {
-  res.send('login user');
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+  //Checks if user exists
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new UnauthenticatedError(
+      'That user does not exist. You can register to create a new account'
+    );
+  }
+  //Checks if inputted password matches password for user
+  const isPasswordValid = await user.verifyPassword(password);
+  if (!isPasswordValid) {
+    throw new UnauthenticatedError('Incorrect password');
+  }
+  //Create JWT Token
+  const token = user.createJWT();
+  //Set req.user
+  req.user = user;
+  //Response
+  res.status(StatusCodes.OK).json({ user: req.user, token });
 };
 
-const getRegistered = async (req, res) => {
-  res.send('get registered gotten');
-};
-
-module.exports = { registerUser, loginUser, getRegistered };
+module.exports = { registerUser, loginUser };

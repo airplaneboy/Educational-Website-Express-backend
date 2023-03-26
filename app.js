@@ -8,12 +8,13 @@ const ErrorHandler = require('./middlewares/error-handler');
 const app = express();
 //Middlewares
 app.use(express.json());
-
 //Routes
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/courses', courses);
-
+//Error Handler
 app.use(ErrorHandler);
+
+//Start Function
 const start = async () => {
   try {
     connectDB(process.env.MONGO_URI);
