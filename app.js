@@ -4,13 +4,14 @@ const express = require('express');
 const connectDB = require('./database/db');
 const { auth, courses } = require('./routes/routes');
 const ErrorHandler = require('./middlewares/error-handler');
+const jwtAuth = require('./middlewares/auth');
 
 const app = express();
 //Middlewares
 app.use(express.json());
 //Routes
 app.use('/api/v1/auth', auth);
-app.use('/api/v1/courses', courses);
+app.use('/api/v1/courses', jwtAuth, courses);
 //Error Handler
 app.use(ErrorHandler);
 
